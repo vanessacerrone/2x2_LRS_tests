@@ -165,9 +165,9 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         
         fit[i] = new TF1(Form("f%d",i), "gaus", min[i], max[i]);
         fit[i]->SetParameter(1, vect_peaks[i]);
-        fit[i]->SetLineColor(red);
+        fit[i]->SetLineColorAlpha(red,0.7);
         fit[i]->SetLineStyle(1);
-	fit[i]->SetLineWidth(1);
+	fit[i]->SetLineWidth(2);
 
 	float w;    // bin width
     	w = spectrum->GetXaxis()->GetBinWidth(0);
@@ -215,7 +215,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     g->SetMarkerStyle(20); 
     g->SetMarkerSize(1.1);
 
-    f1->SetLineColor(blue);
+    f1->SetLineColorAlpha(blue,0.6);
     f1->SetLineStyle(1);
     f1->SetLineWidth(2);
 
