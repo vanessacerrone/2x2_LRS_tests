@@ -41,12 +41,12 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 {
    /*
     * Extracts gain/calibration factor by analyzing single p.e. spectrum
-	* Opens data file, loads TTree and reads integral branch
-	* Performs single channel analysis 
+    * Opens data file, loads TTree and reads integral branch
+    * Performs single channel analysis 
     * Returns vector with # fitted peaks and calibration curve parameters
     
-	* Input:
-	*   1. infilename: rlog data file (.root) 
+    * Input:
+    *   1. infilename: rlog data file (.root) 
     *   2. chan: channel to analyze
     *   3. maxpeaks: max # of p.e. peaks to look for
     *   4. verbose: == 0 default
@@ -291,8 +291,8 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     * Performs all channels analysis 
     * Saves csv file with the results: channel, # peaks, gain ± err, offset ± err
 
-	* Input:
-	*   1. infilename: rlog data file (.root) 
+    * Input:
+    *   1. infilename: rlog data file (.root) 
     *   2. n_channel: # channels to analyze
     *   3. maxpeaks: max # of p.e. peaks to look for
     *   4. verbose: == 0 default
