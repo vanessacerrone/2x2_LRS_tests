@@ -1,6 +1,10 @@
 # 2x2 ArgonCube LRS tests
 Set of scripts for LED calibration run for final Light Readout System (LRS) QA/QC tests
 
+### Prerequisites
+
+![versions](https://img.shields.io/badge/ROOT-v6-blue)
+
 **led_calibration.C** : extract gain/calibration factor by analyzing single photoelectron (p.e.)
 spectrum for each SiPM.
 
