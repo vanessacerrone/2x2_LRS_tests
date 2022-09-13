@@ -39,7 +39,7 @@ Double_t LinearFit(Double_t *x, Double_t *par)
 
 vector<Double_t> single_channel(const string infilename, short chan, int maxpeaks, int verbose = 0)
 {
-    /*
+   /*
     * Extracts gain/calibration factor by analyzing single p.e. spectrum
 	* Opens data file, loads TTree and reads integral branch
 	* Performs single channel analysis 
@@ -52,7 +52,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     *   4. verbose: == 0 default
     *               == 1 prints found peaks 
     *               == 2 saves plots  
-	*/
+    */
 
     // --- Set the style --- //
     style(gStyle); 
@@ -64,33 +64,32 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     vector<string> v = split (infilename, '_');
     string outfilename = "out_" + v[1] + "_" + v[2] + ".root";
 
-	TFile *infile = new TFile(infilename.c_str());
-	TTree *intree = (TTree*) infile->Get("rlog");
+    TFile *infile = new TFile(infilename.c_str());
+    TTree *intree = (TTree*) infile->Get("rlog");
 
     Float_t   amplitude[64];
     Float_t   integral[64];
     
     // Get integral branch 
-	intree->SetBranchAddress("integral", &integral);
-	ULong64_t n_events = intree->GetEntries();
-	ULong64_t counter = 0;
+    intree->SetBranchAddress("integral", &integral);
+    ULong64_t n_events = intree->GetEntries();
+    ULong64_t counter = 0;
 
     Int_t nbins = 500;
     Double_t xmin = 10000;
     Double_t xmax = 45000;
 
     // Create histogram
-	TH1D *spectrum = new TH1D(Form("ch%i",chan), Form("ch%i",chan), nbins, xmin, xmax);
+    TH1D *spectrum = new TH1D(Form("ch%i",chan), Form("ch%i",chan), nbins, xmin, xmax);
 
     // Fill the histogram
-	while( counter < n_events)
-	{
-
-		intree->GetEntry(counter);
-		spectrum->Fill(integral[chan]);
-		counter++;
-
-	}
+    while( counter < n_events)
+    {
+	intree->GetEntry(counter);
+	spectrum->Fill(integral[chan]);
+	counter++;
+	    
+    }
 
 
     // --- Search for peaks --- //
@@ -104,7 +103,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     double minratio = 0.1;	// minimum ratio between a peak and the main peak
 
     nPeaks = s->Search(h_peaks, sigma, "goff", minratio);
-	xPeaks = s->GetPositionX();
+    xPeaks = s->GetPositionX();
 
     vector<double> vect_peaks;
 
@@ -147,11 +146,11 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     Double_t min_resolution = 0.025;
     Double_t max_resolution = 0.027;
 
-	for (int i = 0; i<foundPeaks; i++){
+    for (int i = 0; i<foundPeaks; i++){
 
         min[i] = vect_peaks[i] * (1 - min_resolution);
         max[i] = vect_peaks[i] * (1 + max_resolution);
-
+	    
     }
 
     // --- Fit peaks --- //
@@ -168,11 +167,11 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         fit[i]->SetParameter(1, vect_peaks[i]);
         fit[i]->SetLineColor(red);
         fit[i]->SetLineStyle(1);
-	    fit[i]->SetLineWidth(1);
+	fit[i]->SetLineWidth(1);
 
-		float w;    // bin width
+	float w;    // bin width
     	w = spectrum->GetXaxis()->GetBinWidth(0);
-		spectrum->GetYaxis()->SetTitle(Form("Counts / %0.1f ADC",w));
+	spectrum->GetYaxis()->SetTitle(Form("Counts / %0.1f ADC",w));
         
         //TFitResultPtr r = spectrum->Fit(fit[i],"SR+");
         //r->Print();
@@ -193,21 +192,21 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 
     // --- Linear fit to retrieve SiPM gain --- //
     
-	TF1 *f1 = new TF1("f1", LinearFit, 0, 40000, 2);
+    TF1 *f1 = new TF1("f1", LinearFit, 0, 40000, 2);
 
-	Double_t n_pe[foundPeaks]; // number of PEs
+    Double_t n_pe[foundPeaks]; // number of PEs
 
-	for (unsigned int i=0;i <= foundPeaks;i++) {
+    for (unsigned int i=0;i <= foundPeaks;i++) {
 
-		n_pe[i] = i;
+	n_pe[i] = i;
 
 	}
 
-	TCanvas* c2 = new TCanvas("c2","Linear Fit", 900, 900);
+    TCanvas* c2 = new TCanvas("c2","Linear Fit", 900, 900);
 
     c2->cd();
 
-	TGraphErrors *g = new TGraphErrors(foundPeaks, &n_pe[0], &mu[0], 0, &err_mu[0]);
+    TGraphErrors *g = new TGraphErrors(foundPeaks, &n_pe[0], &mu[0], 0, &err_mu[0]);
 
     graph_style(g);
 
@@ -288,8 +287,8 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 
 void all_channels(string infilename, int n_channels, int maxpeaks, int verbose = 0)
 {
-    /*
-	* Performs all channels analysis 
+   /*
+    * Performs all channels analysis 
     * Saves csv file with the results: channel, # peaks, gain ± err, offset ± err
 
 	* Input:
@@ -299,7 +298,7 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     *   4. verbose: == 0 default
     *               == 1 prints found peaks 
     *               == 2 saves plots  
-	*/
+    */
 
     vector<string> v = split (infilename, '_');
     string results_file = "results_" + v[1] + "_" + v[2] + ".csv";
