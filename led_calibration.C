@@ -57,13 +57,6 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     // --- Set the style --- //
     style(gStyle); 
 
-
-    // example of input filename: rlog_0cd913fb_20220207_020111_aaa.data.root
-    // output filename -> out_0cd913fb_20220207.root 
-
-    vector<string> v = split (infilename, '_');
-    string outfilename = "out_" + v[1] + "_" + v[2] + ".root";
-
     TFile *infile = new TFile(infilename.c_str());
     TTree *intree = (TTree*) infile->Get("rlog");
 
@@ -137,8 +130,6 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     spectrum->GetYaxis()->SetTitle("Counts");
     spectrum->GetXaxis()->SetTitle("ADC Counts");
 
-    // create output file
-    //TFile * outfile = new TFile(outfilename.c_str(), "UPDATE");
 
     // define range for gaussian fit 
     Double_t min[foundPeaks];
@@ -182,11 +173,6 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         err_mu.push_back(fit[i]->GetParError(1));
 
    } 
-
-        // write on output file
-        //c1->Write();
-        //outfile->Close();
-
 
 
 
@@ -299,6 +285,9 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     *               == 1 prints found peaks 
     *               == 2 saves plots  
     */
+
+    // example of input filename: rlog_0cd913fb_20220207_020111_aaa.data.root
+    // output filename -> results_0cd913fb_20220207.csv
 
     vector<string> v = split (infilename, '_');
     string results_file = "results_" + v[1] + "_" + v[2] + ".csv";
