@@ -1,12 +1,23 @@
-
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <fstream>
 #include <cmath>
 #include <vector>
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TStyle.h"
+#include "TH1D.h"
+#include "TGraph.h"
+#include "TGraphErrors.h"
+#include "TText.h"
+#include "TPaveText.h"
+#include "TColor.h"
+#include "TSpectrum.h"
+#include "TCanvas.h"
+#include "TF1.h"
+
 #include "set_style.C"
 
 using namespace std;
@@ -68,7 +79,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     ULong64_t n_events = intree->GetEntries();
     ULong64_t counter = 0;
 
-    Int_t nbins = 500;
+    Int_t nbins = 400;
     Double_t xmin = 10000;
     Double_t xmax = 45000;
 
@@ -152,11 +163,11 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     vector<double> mu;
     vector<double> err_mu;
 
-    for (unsigned int i=0; i < foundPeaks; i++) { 
+    for (int i=0; i < foundPeaks; i++) { 
         
         fit[i] = new TF1(Form("f%d",i), "gaus", min[i], max[i]);
         fit[i]->SetParameter(1, vect_peaks[i]);
-        fit[i]->SetLineColorAlpha(red,0.7);
+        fit[i]->SetLineColorAlpha(red,0.6);
         fit[i]->SetLineStyle(1);
 	fit[i]->SetLineWidth(2);
 
@@ -182,7 +193,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 
     Double_t n_pe[foundPeaks]; // number of PEs
 
-    for (unsigned int i=0;i <= foundPeaks;i++) {
+    for (int i=0;i <= foundPeaks;i++) {
 
 	n_pe[i] = i;
 
