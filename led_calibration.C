@@ -48,7 +48,7 @@ Double_t LinearFit(Double_t *x, Double_t *par)
 
 
 
-vector<Double_t> single_channel(const string infilename, short chan, int maxpeaks, int verbose = 0)
+vector<Double_t> single_channel(const string infilename, short chan, int maxpeaks, int verbose = 0, string lrs = "ACL")
 {
    /*
     * Extracts gain/calibration factor by analyzing single p.e. spectrum
@@ -71,7 +71,6 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     TFile *infile = new TFile(infilename.c_str());
     TTree *intree = (TTree*) infile->Get("rlog");
 
-    Float_t   amplitude[64];
     Float_t   integral[64];
     
     // Get integral branch 
@@ -79,9 +78,23 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     ULong64_t n_events = intree->GetEntries();
     ULong64_t counter = 0;
 
-    Int_t nbins = 400;
+    Int_t nbins;
     Double_t xmin = 10000;
-    Double_t xmax = 45000;
+    Double_t xmax;
+
+
+    if (lrs == "ACL") {
+        xmax = 45000;
+        nbins = 400;
+    }
+    else if (lrs == "LCM"){
+        xmax = 80000; 
+        nbins = 600;
+    }
+    else {
+        cout << "Invalid LRS option.\nChoose either LCM or ACL. \n";
+        exit(1);
+    }
 
     // Create histogram
     TH1D *spectrum = new TH1D(Form("ch%i",chan), Form("ch%i",chan), nbins, xmin, xmax);
@@ -104,7 +117,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     int foundPeaks;
 
     int sigma = 3;
-    double minratio = 0.05;	// minimum ratio between a peak and the main peak
+    double minratio = 0.02;	// minimum ratio between a peak and the main peak
 
     nPeaks = s->Search(h_peaks, sigma, "goff", minratio);
     xPeaks = s->GetPositionX();
@@ -257,12 +270,15 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     TText *t2 = label->GetLineWith("Channel");
     t2->SetTextColor(blue);
 
+    vector<string> v = split (infilename, '_');
+    string plot_file = v[2] + "_" + v[3];
 
     if(verbose == 2) {
-
-        c1->SaveAs(Form("plots/ch%d_spectrum.pdf",chan));
-        c2->SaveAs(Form("plots/ch%d_fit.pdf",chan));
-
+        // do not save plot for inactive channels (empty branches->gain=0)
+        if(b != 0) {
+            c1->SaveAs(Form("plots/%s/%s_ch%d_spectrum.pdf",lrs.c_str(),plot_file.c_str(),chan));
+            c2->SaveAs(Form("plots/%s/%s_ch%d_fit.pdf",lrs.c_str(),plot_file.c_str(),chan));
+        }
     }
     
 
@@ -281,7 +297,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 
 
 
-void all_channels(string infilename, int n_channels, int maxpeaks, int verbose = 0)
+void all_channels(string infilename, int n_channels, int maxpeaks, int verbose = 0, string lrs = "ACL")
 {
    /*
     * Performs all channels analysis 
@@ -297,10 +313,10 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     */
 
     // example of input filename: rlog_0cd913fb_20220207_020111_aaa.data.root
-    // output filename -> results_0cd913fb_20220207.csv
+    // output filename -> results_0cd913fb_20220207_020111.csv
 
     vector<string> v = split (infilename, '_');
-    string results_file = "results_" + v[1] + "_" + v[2] + ".csv";
+    string results_file = "results_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
 
     FILE *fo;
 
@@ -310,17 +326,17 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     
     vector<Double_t> temp(5);
     
-    for (int i = 4; i <= n_channels; i++) {     // skip first 4 channels (empty) -> to change eventually
+    for (int i = 0; i <= n_channels; i++) {    
 
-        temp = single_channel(infilename, i, maxpeaks, verbose);
+        temp = single_channel(infilename, i, maxpeaks, verbose, lrs);
 
-        // force gain (and error) to -1000 for channels with only pedestal
+        // force gain (and error) to -1000 for channels with pedestal only
         if(temp.at(2) < 0) { 
             temp.at(2) = -1000;
             temp.at(4) = -1000;
             }
 
-        fprintf(fo,"%d, %1.0f, %1.2f, %1.2f, %1.2f, %1.2f\n", i, temp.at(0), temp.at(2), temp.at(4), temp.at(1), temp.at(3));    
+        fprintf(fo,"%d,%1.0f,%1.2f,%1.2f,%1.2f,%1.2f\n", i, temp.at(0), temp.at(2), temp.at(4), temp.at(1), temp.at(3));    
 
     }
    
