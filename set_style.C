@@ -1,3 +1,4 @@
+#include "TStyle.h"
 
 void style(TStyle* gStyle) {
 

@@ -1,3 +1,6 @@
 *.root
 *.csv
 *.vscode
+*.d
+*.so
+*.DS_Store

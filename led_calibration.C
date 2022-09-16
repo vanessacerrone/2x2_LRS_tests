@@ -104,7 +104,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     int foundPeaks;
 
     int sigma = 3;
-    double minratio = 0.1;	// minimum ratio between a peak and the main peak
+    double minratio = 0.05;	// minimum ratio between a peak and the main peak
 
     nPeaks = s->Search(h_peaks, sigma, "goff", minratio);
     xPeaks = s->GetPositionX();
@@ -138,9 +138,12 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     c1->cd();
 
     histo_style(spectrum);
-    spectrum->GetYaxis()->SetTitle("Counts");
-    spectrum->GetXaxis()->SetTitle("ADC Counts");
 
+    float w;    // bin width
+    w = spectrum->GetXaxis()->GetBinWidth(0);
+
+    spectrum->GetYaxis()->SetTitle("Counts");
+	spectrum->GetYaxis()->SetTitle(Form("Counts / %0.1f ADC",w));
 
     // define range for gaussian fit 
     Double_t min[foundPeaks];
@@ -170,10 +173,6 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         fit[i]->SetLineColorAlpha(red,0.6);
         fit[i]->SetLineStyle(1);
 	fit[i]->SetLineWidth(2);
-
-	float w;    // bin width
-    	w = spectrum->GetXaxis()->GetBinWidth(0);
-	spectrum->GetYaxis()->SetTitle(Form("Counts / %0.1f ADC",w));
         
         //TFitResultPtr r = spectrum->Fit(fit[i],"SR+");
         //r->Print();
@@ -307,13 +306,19 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
 
     fo = fopen(const_cast<char*>(results_file.c_str()), "w+");
 
-    fprintf(fo,"Channel, # Peaks, Gain, Error_g,  Offset, Error_o\n");
+    fprintf(fo,"Channel,Peaks,Gain,Error_g, Offset,Error_o\n");
     
     vector<Double_t> temp(5);
     
     for (int i = 4; i <= n_channels; i++) {     // skip first 4 channels (empty) -> to change eventually
 
         temp = single_channel(infilename, i, maxpeaks, verbose);
+
+        // force gain (and error) to -1000 for channels with only pedestal
+        if(temp.at(2) < 0) { 
+            temp.at(2) = -1000;
+            temp.at(4) = -1000;
+            }
 
         fprintf(fo,"%d, %1.0f, %1.2f, %1.2f, %1.2f, %1.2f\n", i, temp.at(0), temp.at(2), temp.at(4), temp.at(1), temp.at(3));    
 
