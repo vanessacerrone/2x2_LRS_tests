@@ -63,6 +63,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     *   4. verbose: == 0 default
     *               == 1 prints found peaks 
     *               == 2 saves plots  
+    *   5. lrs: ArCLight (ACL) or Light Collection Module (LCM)
     */
 
     // --- Set the style --- //
@@ -89,7 +90,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     }
     else if (lrs == "LCM"){
         xmax = 80000; 
-        nbins = 600;
+        nbins = 500;
     }
     else {
         cout << "Invalid LRS option.\nChoose either LCM or ACL. \n";
@@ -117,7 +118,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     int foundPeaks;
 
     int sigma = 3;
-    double minratio = 0.02;	// minimum ratio between a peak and the main peak
+    double minratio = 0.05;	// minimum ratio between a peak and the main peak
 
     nPeaks = s->Search(h_peaks, sigma, "goff", minratio);
     xPeaks = s->GetPositionX();
@@ -274,7 +275,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     string plot_file = v[2] + "_" + v[3];
 
     if(verbose == 2) {
-        // do not save plot for inactive channels (empty branches->gain=0)
+        // do not save plot for inactive channels (empty branches -> gain=0)
         if(b != 0) {
             c1->SaveAs(Form("plots/%s/%s_ch%d_spectrum.pdf",lrs.c_str(),plot_file.c_str(),chan));
             c2->SaveAs(Form("plots/%s/%s_ch%d_fit.pdf",lrs.c_str(),plot_file.c_str(),chan));
@@ -310,13 +311,14 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     *   4. verbose: == 0 default
     *               == 1 prints found peaks 
     *               == 2 saves plots  
+    *   5. lrs: ACL or LCM
     */
 
     // example of input filename: rlog_0cd913fb_20220207_020111_aaa.data.root
     // output filename -> results_0cd913fb_20220207_020111.csv
 
     vector<string> v = split (infilename, '_');
-    string results_file = "results_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
+    string results_file = lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
 
     FILE *fo;
 
@@ -330,10 +332,10 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
 
         temp = single_channel(infilename, i, maxpeaks, verbose, lrs);
 
-        // force gain (and error) to -1000 for channels with pedestal only
+        // force gain (and error) to -1000 (to 0) for channels with pedestal only
         if(temp.at(2) < 0) { 
             temp.at(2) = -1000;
-            temp.at(4) = -1000;
+            temp.at(4) = 0;
             }
 
         fprintf(fo,"%d,%1.0f,%1.2f,%1.2f,%1.2f,%1.2f\n", i, temp.at(0), temp.at(2), temp.at(4), temp.at(1), temp.at(3));    
