@@ -48,7 +48,7 @@ Double_t LinearFit(Double_t *x, Double_t *par)
 
 
 
-vector<Double_t> single_channel(const string infilename, short chan, int maxpeaks, int verbose = 0, string lrs = "ACL")
+vector<Double_t> single_channel(const string infilename, short chan, int maxpeaks, int verbose = 0)
 {
    /*
     * Extracts gain/calibration factor by analyzing single p.e. spectrum
@@ -63,11 +63,30 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     *   4. verbose: == 0 default
     *               == 1 prints found peaks 
     *               == 2 saves plots  
-    *   5. lrs: ArCLight (ACL) or Light Collection Module (LCM)
     */
 
     // --- Set the style --- //
     style(gStyle); 
+
+    // example of input filename: rlog_0cd913fb_20220207_020111_aaa.data.root
+    // 0cd913fb -> ACL ADC
+    // 0cd93db0 -> LCM ADC
+
+    vector<string> v = split (infilename, '_');
+
+    string lrs;         // lrs: ArCLight (ACL) or Light Collection Module (LCM)
+    string SR = v[1];   // serial number identifies ADC
+
+
+    if(SR == "0cd913fb") {
+        lrs = "ACL";
+    }
+
+    else if(SR == "0cd93db0") {
+        lrs = "LCM";
+    }
+
+    string results_file = lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
 
     TFile *infile = new TFile(infilename.c_str());
     TTree *intree = (TTree*) infile->Get("rlog");
@@ -89,8 +108,8 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         nbins = 400;
     }
     else if (lrs == "LCM"){
-        xmax = 80000; 
-        nbins = 500;
+        xmax = 45000; 
+        nbins = 400;
     }
     else {
         cout << "Invalid LRS option.\nChoose either LCM or ACL. \n";
@@ -156,7 +175,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     float w;    // bin width
     w = spectrum->GetXaxis()->GetBinWidth(0);
 
-    spectrum->GetYaxis()->SetTitle("Counts");
+    spectrum->GetXaxis()->SetTitle("ADC counts");
 	spectrum->GetYaxis()->SetTitle(Form("Counts / %0.1f ADC",w));
 
     // define range for gaussian fit 
@@ -271,7 +290,6 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     TText *t2 = label->GetLineWith("Channel");
     t2->SetTextColor(blue);
 
-    vector<string> v = split (infilename, '_');
     string plot_file = v[2] + "_" + v[3];
 
     if(verbose == 2) {
@@ -298,7 +316,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 
 
 
-void all_channels(string infilename, int n_channels, int maxpeaks, int verbose = 0, string lrs = "ACL")
+void all_channels(string infilename, int n_channels, int maxpeaks, int verbose = 0)
 {
    /*
     * Performs all channels analysis 
@@ -310,14 +328,25 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     *   3. maxpeaks: max # of p.e. peaks to look for
     *   4. verbose: == 0 default
     *               == 1 prints found peaks 
-    *               == 2 saves plots  
-    *   5. lrs: ACL or LCM
+    *               == 2 saves plots 
     */
 
     // example of input filename: rlog_0cd913fb_20220207_020111_aaa.data.root
     // output filename -> results_0cd913fb_20220207_020111.csv
 
     vector<string> v = split (infilename, '_');
+    
+    string lrs;
+    string SR = v[1]; // serial number identifies ADC
+
+    if(SR == "0cd913fb") {
+        lrs = "ACL";
+    }
+
+    else if(SR == "0cd93db0") {
+        lrs = "LCM";
+    }
+
     string results_file = lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
 
     FILE *fo;
@@ -330,7 +359,7 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     
     for (int i = 0; i <= n_channels; i++) {    
 
-        temp = single_channel(infilename, i, maxpeaks, verbose, lrs);
+        temp = single_channel(infilename, i, maxpeaks, verbose);
 
         // force gain (and error) to -1000 (to 0) for channels with pedestal only
         if(temp.at(2) < 0) { 
