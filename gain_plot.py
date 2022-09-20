@@ -37,8 +37,8 @@ from matplotlib import gridspec
 from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
 
-# path to save plots 
-PATH = 'plots/SiPM_gain/'
+# PATH to save plots 
+SAVE_PATH = 'plots/SiPM_gain/'
 
 # define ticks
 def set_ticks(ax, xMaj, yMaj):
@@ -140,8 +140,8 @@ def plot(infile, save):
 
 
     if(save == 'True'):
-        fig.savefig(PATH + outfile + '_all_ch.pdf', dpi = 200)
-        print('Saving file as: %s' % ( PATH + outfile + '_all_ch.pdf'))
+        fig.savefig(SAVE_PATH + outfile + '_all_ch.pdf', dpi = 200)
+        print('Saving file as: %s' % ( SAVE_PATH + outfile + '_all_ch.pdf'))
     
 
 
@@ -216,8 +216,8 @@ def valid_channels(infile, save):
     plt.show() # comment if you do not want to display the plot 
 
     if(save == 'True'):
-        fig.savefig(PATH + outfile + '_valid_ch.pdf', dpi = 200)
-        print('Saving file as: %s' % (PATH + outfile + '_valid_ch.pdf'))
+        fig.savefig(SAVE_PATH + outfile + '_valid_ch.pdf', dpi = 200)
+        print('Saving file as: %s' % (SAVE_PATH + outfile + '_valid_ch.pdf'))
     
 
 

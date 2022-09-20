@@ -86,8 +86,6 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         lrs = "LCM";
     }
 
-    string results_file = lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
-
     TFile *infile = new TFile(infilename.c_str());
     TTree *intree = (TTree*) infile->Get("rlog");
 
@@ -347,7 +345,8 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
         lrs = "LCM";
     }
 
-    string results_file = lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
+    string csv_path = "csv_files/";
+    string results_file = csv_path + lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
 
     FILE *fo;
 
@@ -357,7 +356,7 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
     
     vector<Double_t> temp(5);
     
-    for (int i = 0; i <= n_channels; i++) {    
+    for (int i = 0; i < n_channels; i++) {    
 
         temp = single_channel(infilename, i, maxpeaks, verbose);
 

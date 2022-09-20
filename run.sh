@@ -3,6 +3,8 @@
 # run led calibration script
 # usage: .run.sh filename 
 
+echo "Analysing file: $1"
+
 root -b -l << EOF
 
 .L led_calibration.C
