@@ -158,7 +158,7 @@ def valid_channels(infile, save):
     number = s[-1].split('.')
     outfile = s[0] + '_' + s[2] + '_' + number[0]
 
-    fig, ax = plt.subplots(figsize=(8,6))
+    fig, (ax1,ax2) = plt.subplots(1,2, figsize=(16,6))
     
     #colors = ['#004C97', '#4C8C2B', '#AF272F', '#F68D2E', '#FED141','#80A6CB', '#A6C695','#D79397','#FBC696']
     colors = itertools.cycle(plt.cm.tab20.colors)
@@ -169,26 +169,49 @@ def valid_channels(infile, save):
 
     if(s[0] == 'ACL'):
         for (key, grp), i in zip(ACL, range(len(ACL))):
-            ax.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
+            ax1.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
                     linestyle='none', c = next(colors), zorder = 10)
-            ax.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
+            ax1.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
+            
 
     if(s[0] == 'LCM'):
         for (key, grp), i in zip(LCM, range(len(LCM))):
-            ax.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
+            ax1.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
                     linestyle='none',c = next(colors), zorder = 10)
-            ax.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
-        
+            ax1.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
+
+
+    colors = itertools.cycle(plt.cm.tab20.colors)
+    marker = itertools.cycle(('o', 's', 'd', 'v','X','h','^')) 
+
+    if(s[0] == 'ACL'):
+        for (key, grp), i in zip(ACL, range(len(ACL))):
+            ax2.plot(grp['Channel'], grp['Peaks'], label=key,marker = next(marker), mec='white', markersize=8,
+                    linestyle='none', c = next(colors), zorder = 10)
+            ax2.plot(grp['Channel'], grp['Peaks'], ls='-', alpha=0.4, lw=2, c = next(colors))
+
+    if(s[0] == 'LCM'):
+        for (key, grp), i in zip(LCM, range(len(LCM))):
+            ax2.plot(grp['Channel'], grp['Peaks'], label=key,marker = next(marker), mec='white', markersize=8,
+                    linestyle='none', c = next(colors), zorder = 10)
+            ax2.plot(grp['Channel'], grp['Peaks'], ls='-', alpha=0.4, lw=2, c = next(colors))
+
 
     # labels 
-    ax.set_ylabel('SiPM Gain [ADC / p.e.]', fontsize = 14)
-    ax.set_xlabel('Channel number', fontsize = 14)
+    ax1.set_ylabel('SiPM Gain [ADC / p.e.]', fontsize = 14)
+    ax1.set_xlabel('Channel number', fontsize = 14)
+
+    ax2.set_ylabel('# fitted peaks', fontsize = 14)
+    ax2.set_xlabel('Channel number', fontsize = 14)
 
     # ticks
     y_ticks_spacing = (np.max(df_valid['Gain']) - np.min(df_valid['Gain'])) / 5 
-    set_ticks(ax, 5, int(y_ticks_spacing))
+    set_ticks(ax1, 5, int(y_ticks_spacing))
+    set_ticks(ax2, 5, 1)
 
-    ax.legend(loc = 'best', prop = {'size': 11}, ncol = 2, frameon = False)
+
+    #ax1.legend(loc = 'best', prop = {'size': 9}, ncol = 2, frameon = False)
+    ax2.legend(loc = (1.02,0.3), prop = {'size': 10}, ncol = 1, frameon = False)
 
     plt.show() # comment if you do not want to display the plot 
 
@@ -205,8 +228,6 @@ def main(infile, save, debug):
 
     if(debug == 'True'):
         valid_channels(infile, save)
-
-
 
 
 
