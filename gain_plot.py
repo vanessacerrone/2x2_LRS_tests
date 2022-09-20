@@ -22,6 +22,7 @@
 
 import os
 import argparse
+import itertools
 
 # computing
 import numpy as np
@@ -35,6 +36,9 @@ import matplotlib as mpl
 from matplotlib import gridspec
 from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
+
+# path to save plots 
+PATH = 'plots/SiPM_gain/'
 
 # define ticks
 def set_ticks(ax, xMaj, yMaj):
@@ -57,7 +61,9 @@ def read_data(infile):
         *Output:    original df, valid channels df, only pedestal df, inactive ch df 
 
     '''
+
     df = pd.read_csv(infile, sep=',')
+    # read connections file 
     connections = pd.read_csv('connections.csv', sep=',')
 
     df['ACL'] = connections['ACL']
@@ -105,29 +111,37 @@ def plot(infile, save):
     set_ticks(ax, 5,500)
     ax.set_xlim(-2,67)
 
+   
     # inset 
-    ins = ax.inset_axes([0.5, 0.5, 0.45, 0.35], transform=ax.transAxes)
-    
+
+    if np.min(df_valid['Channel'])/ np.max(df_valid['Channel']) > 0.5 :
+        x0 = 0.1
+    else:
+        x0 = 0.5
+
+    ins_bounds = [x0, 0.5, 0.4, 0.35] # [x0, y0, width, height]
+    ins = ax.inset_axes(ins_bounds, transform=ax.transAxes)
+    #ins = ax.inset_axes([0.5, 0.5, 0.45, 0.35], transform=ax.transAxes)
 
     ins.plot(df_valid['Channel'], df_valid['Gain'],color='#004C97', ls='-', alpha=0.4, lw=2)
     ins.plot(df_valid['Channel'], df_valid['Gain'], lw=0, marker='o',  alpha=1, markersize=3, color='#004C97')
 
-    ins.text(0.8,0.8, 'Valid channels', fontsize = 8, transform=ax.transAxes )
+    ins.set_title('Valid channels', fontsize = 8)
     ins.grid(axis='y',ls='-',alpha=0.25, color='gray')
 
     ins.tick_params(which='major', width=1.0, length=8, direction='in', labelsize=10)
     ins.tick_params(which='minor', width=1.0, length=4, direction='in', labelsize=10)
     ins.minorticks_on()
 
-    ax.indicate_inset_zoom(ins, edgecolor="gray")
+    ax.indicate_inset_zoom(ins, edgecolor='gray')
     ax.legend(loc = 'best', prop = {'size': 11}, ncol = 1, frameon = False)
 
     plt.show() # comment if you do not want to display the plot 
 
 
     if(save == 'True'):
-        fig.savefig(outfile + '_all_ch.pdf', dpi = 200)
-        print('Saving file as: %s' % (outfile + '_all_ch.pdf'))
+        fig.savefig(PATH + outfile + '_all_ch.pdf', dpi = 200)
+        print('Saving file as: %s' % ( PATH + outfile + '_all_ch.pdf'))
     
 
 
@@ -140,21 +154,31 @@ def valid_channels(infile, save):
     '''
     _, df_valid, _ , _ = read_data(infile)
 
-    # 
     s = infile.split('_')
     number = s[-1].split('.')
     outfile = s[0] + '_' + s[2] + '_' + number[0]
 
     fig, ax = plt.subplots(figsize=(8,6))
     
+    #colors = ['#004C97', '#4C8C2B', '#AF272F', '#F68D2E', '#FED141','#80A6CB', '#A6C695','#D79397','#FBC696']
+    colors = itertools.cycle(plt.cm.tab20.colors)
+    marker = itertools.cycle(('o', 's', 'd', 'v','X','h','^')) 
+
+    ACL = df_valid.groupby(['ACL'])
+    LCM = df_valid.groupby(['LCM'])
+
     if(s[0] == 'ACL'):
-        for key, grp in df_valid.groupby(['ACL']):
-            ax.plot(grp['Channel'], grp['Gain'], label=key, marker='d', mec='white', markersize=8,
-                    linestyle='none')
+        for (key, grp), i in zip(ACL, range(len(ACL))):
+            ax.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
+                    linestyle='none', c = next(colors), zorder = 10)
+            ax.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
+
     if(s[0] == 'LCM'):
-        for key, grp in df_valid.groupby(['LCM']):
-            ax.plot(grp['Channel'], grp['Gain'], label=key, marker='d', mec='white', markersize=8,
-                    linestyle='none')
+        for (key, grp), i in zip(LCM, range(len(LCM))):
+            ax.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
+                    linestyle='none',c = next(colors), zorder = 10)
+            ax.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
+        
 
     # labels 
     ax.set_ylabel('SiPM Gain [ADC / p.e.]', fontsize = 14)
@@ -169,8 +193,8 @@ def valid_channels(infile, save):
     plt.show() # comment if you do not want to display the plot 
 
     if(save == 'True'):
-        fig.savefig(outfile + '_valid_ch.pdf', dpi = 200)
-        print('Saving file as: %s' % (outfile + '_valid_ch.pdf'))
+        fig.savefig(PATH + outfile + '_valid_ch.pdf', dpi = 200)
+        print('Saving file as: %s' % (PATH + outfile + '_valid_ch.pdf'))
     
 
 
