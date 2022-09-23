@@ -94,14 +94,14 @@ def plot(infile, save):
 
     fig, ax = plt.subplots(figsize=(8,6))
 
-    ax.plot(df_valid['Channel'], df_valid['Gain'], marker='o', mec='white', markersize=7,
-                    color='#004C97', linestyle='none', label='Valid channels')
+    ax.errorbar(df_valid['Channel'], df_valid['Gain'], yerr = df_valid['Error_g'], marker='o', mec='white', markersize=7,
+                    color='#004C97', linestyle='none', label='Valid channels', capsize=4)
 
-    ax.plot(df_ped['Channel'], df_ped['Gain'], marker='s', mec='white', markersize=6,
-                    color='#4C8C2B', linestyle='none', label='Only pedestal')
+    ax.errorbar(df_ped['Channel'], df_ped['Gain'], yerr = df_ped['Error_g'],  marker='s', mec='white', markersize=6,
+                    color='#4C8C2B', linestyle='none', label='Only pedestal', capsize=4)
 
-    ax.plot(df_null['Channel'], df_null['Gain'], marker='d', mec='white', markersize=7,
-                    color='#AF272F', linestyle='none', label='Inactive channels')
+    ax.errorbar(df_null['Channel'], df_null['Gain'], yerr = df_null['Error_g'], marker='d', mec='white', markersize=7,
+                    color='#AF272F', linestyle='none', label='Inactive channels', capsize=4)
 
     # labels 
     ax.set_ylabel('SiPM Gain [ADC / p.e.]', fontsize = 14)
@@ -110,6 +110,7 @@ def plot(infile, save):
     # ticks
     set_ticks(ax, 5,500)
     ax.set_xlim(-2,67)
+    ax.set_ylim(top = np.max(df['Gain'])*(1+0.5))
 
    
     # inset 
@@ -123,8 +124,9 @@ def plot(infile, save):
     ins = ax.inset_axes(ins_bounds, transform=ax.transAxes)
     #ins = ax.inset_axes([0.5, 0.5, 0.45, 0.35], transform=ax.transAxes)
 
-    ins.plot(df_valid['Channel'], df_valid['Gain'],color='#004C97', ls='-', alpha=0.4, lw=2)
-    ins.plot(df_valid['Channel'], df_valid['Gain'], lw=0, marker='o',  alpha=1, markersize=3, color='#004C97')
+    ins.plot(df_valid['Channel'], df_valid['Gain'], color='#004C97', ls='-', alpha=0.4, lw=2)
+    ins.errorbar(df_valid['Channel'], df_valid['Gain'], yerr = df_valid['Error_g'], 
+                    ls='none', marker='o',  alpha=1, markersize=3, color='#004C97',capsize=4)
 
     ins.set_title('Valid channels', fontsize = 8)
     ins.grid(axis='y',ls='-',alpha=0.25, color='gray')
@@ -134,7 +136,7 @@ def plot(infile, save):
     ins.minorticks_on()
 
     ax.indicate_inset_zoom(ins, edgecolor='gray')
-    ax.legend(loc = 'best', prop = {'size': 11}, ncol = 1, frameon = False)
+    ax.legend(loc = 'upper left', prop = {'size': 11}, ncol = 3, frameon = False)
 
     plt.show() # comment if you do not want to display the plot 
 
@@ -169,15 +171,15 @@ def valid_channels(infile, save):
 
     if(s[0] == 'ACL'):
         for (key, grp), i in zip(ACL, range(len(ACL))):
-            ax1.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
-                    linestyle='none', c = next(colors), zorder = 10)
+            ax1.errorbar(grp['Channel'], grp['Gain'], grp['Error_g'],label=key,marker = next(marker), mec='white', markersize=8,
+                    linestyle='none', c = next(colors), zorder = 10, capsize=4)
             ax1.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
             
 
     if(s[0] == 'LCM'):
         for (key, grp), i in zip(LCM, range(len(LCM))):
-            ax1.plot(grp['Channel'], grp['Gain'], label=key,marker = next(marker), mec='white', markersize=8,
-                    linestyle='none',c = next(colors), zorder = 10)
+            ax1.errorbar(grp['Channel'], grp['Gain'], grp['Error_g'], label=key,marker = next(marker), mec='white', markersize=8,
+                    linestyle='none',c = next(colors), zorder = 10, capsize=4)
             ax1.plot(grp['Channel'], grp['Gain'], ls='-', alpha=0.4, lw=2, c = next(colors))
 
 
@@ -186,7 +188,7 @@ def valid_channels(infile, save):
 
     if(s[0] == 'ACL'):
         for (key, grp), i in zip(ACL, range(len(ACL))):
-            ax2.plot(grp['Channel'], grp['Peaks'], label=key,marker = next(marker), mec='white', markersize=8,
+            ax2.plot(grp['Channel'], grp['Peaks'],  label=key,marker = next(marker), mec='white', markersize=8,
                     linestyle='none', c = next(colors), zorder = 10)
             ax2.plot(grp['Channel'], grp['Peaks'], ls='-', alpha=0.4, lw=2, c = next(colors))
 
