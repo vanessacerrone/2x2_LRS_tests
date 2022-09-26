@@ -118,7 +118,7 @@ def plot(infile, save):
     if np.min(df_valid['Channel'])/ np.max(df_valid['Channel']) > 0.5 :
         x0 = 0.1
     else:
-        x0 = 0.5
+        x0 = 0.56
 
     ins_bounds = [x0, 0.5, 0.4, 0.35] # [x0, y0, width, height]
     ins = ax.inset_axes(ins_bounds, transform=ax.transAxes)

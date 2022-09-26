@@ -106,8 +106,8 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         nbins = 400;
     }
     else if (lrs == "LCM"){
-        xmax = 45000; 
-        nbins = 400;
+        xmax = 65000; 
+        nbins = 500;
     }
     else {
         cout << "Invalid LRS option.\nChoose either LCM or ACL. \n";
@@ -294,7 +294,9 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         // do not save plot for inactive channels (empty branches -> gain=0)
         if(b != 0) {
             c1->SaveAs(Form("plots/%s/%s_ch%d_spectrum.pdf",lrs.c_str(),plot_file.c_str(),chan));
+            if(b > 0) {
             c2->SaveAs(Form("plots/%s/%s_ch%d_fit.pdf",lrs.c_str(),plot_file.c_str(),chan));
+            }
         }
     }
     
@@ -345,8 +347,7 @@ void all_channels(string infilename, int n_channels, int maxpeaks, int verbose =
         lrs = "LCM";
     }
 
-    string csv_path = "csv_files/";
-    string results_file = csv_path + lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
+    string results_file = lrs + "_" + v[1] + "_" + v[2] + "_" + v[3] + ".csv";
 
     FILE *fo;
 
