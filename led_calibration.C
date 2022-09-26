@@ -118,12 +118,11 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     TH1D *spectrum = new TH1D(Form("ch%i",chan), Form("ch%i",chan), nbins, xmin, xmax);
 
     // Fill the histogram
-    while( counter < n_events)
+    while( counter < n_events )
     {
 	intree->GetEntry(counter);
 	spectrum->Fill(integral[chan]);
 	counter++;
-	    
     }
 
 
@@ -134,10 +133,10 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     double *xPeaks;
     int foundPeaks;
 
-    int sigma = 3;
+    int width = 3;
     double minratio = 0.05;	// minimum ratio between a peak and the main peak
 
-    nPeaks = s->Search(h_peaks, sigma, "goff", minratio);
+    nPeaks = s->Search(h_peaks, width, "goff", minratio);
     xPeaks = s->GetPositionX();
 
     vector<double> vect_peaks;
@@ -194,8 +193,10 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 
     spectrum->Draw();
 
-    vector<double> mu;
-    vector<double> err_mu;
+    vector<double> mu;          // centroid [ADC counts]
+    vector<double> err_mu;      // error on centroid 
+    vector<double> sigma;       // sigma 
+    vector<double> err_sigma;   // error on sigma 
 
     for (int i=0; i < foundPeaks; i++) { 
         
@@ -203,7 +204,7 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
         fit[i]->SetParameter(1, vect_peaks[i]);
         fit[i]->SetLineColorAlpha(red,0.6);
         fit[i]->SetLineStyle(1);
-	fit[i]->SetLineWidth(2);
+	    fit[i]->SetLineWidth(2);
         
         //TFitResultPtr r = spectrum->Fit(fit[i],"SR+");
         //r->Print();
@@ -212,14 +213,37 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
 
         mu.push_back(fit[i]->GetParameter(1));
         err_mu.push_back(fit[i]->GetParError(1));
+        sigma.push_back(fit[i]->GetParameter(2));
+        err_sigma.push_back(fit[i]->GetParError(2));
 
    } 
 
 
+    FILE *f;
 
+    string pedestal_file = lrs + "_pedestal_" +  v[2] + "_" + v[3] + ".csv";
+
+    if (f == fopen(const_cast<char*>(pedestal_file.c_str()), "r")){
+        fclose(f);
+        printf("file exists");
+
+    } else {
+        f = fopen(const_cast<char*>(pedestal_file.c_str()), "w");
+        fprintf(f,"Channel,Centroid,Error_c,Sigma,Error_s\n");
+        printf("file doesn't exist");
+    }
+
+
+    f = fopen(const_cast<char*>(pedestal_file.c_str()), "a");
+    if(mu.size() != 0) {
+
+        fprintf(f,"%d,%1.2f,%1.2f,%1.2f,%1.2f\n", chan, mu.at(0), err_mu.at(0), sigma.at(0), err_sigma.at(0));    
+        
+    }
+    
     // --- Linear fit to retrieve SiPM gain --- //
     
-    TF1 *f1 = new TF1("f1", LinearFit, 0, 40000, 2);
+    TF1 *f1 = new TF1("f1", LinearFit, 0, xmax, 2);
 
     Double_t n_pe[foundPeaks]; // number of PEs
 
@@ -251,12 +275,11 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     g->Fit(f1,"R+");
     g->Draw("ap SAME");
     
-	
+	// function y = a+bx 
     double a = f1->GetParameter(0);
     double b = f1->GetParameter(1);
     double err_a = f1->GetParError(0);
     double err_b = f1->GetParError(1);
-
 
 
     // ---  Graphical stuff --- //

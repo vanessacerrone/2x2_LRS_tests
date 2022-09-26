@@ -223,11 +223,54 @@ def valid_channels(infile, save):
     
 
 
+def pedestal(infile, save):
+
+    s = infile.split('_')
+
+    pedestal_file = s[0] + '_pedestal_' + s[2] + '_' + s[3]
+   
+    print('Opening file with pedestal data: ', pedestal_file)
+
+    ch, mu, err_mu, sigma, err_sigma = np.loadtxt(pedestal_file, delimiter=',', unpack= True, skiprows=1)
+   
+    fig, (ax1,ax2) = plt.subplots(1,2, figsize=(16,6))
+
+    ax1.errorbar(ch, mu, yerr = err_mu, marker='o', mec='white', markersize=7,
+                    color='#004C97', linestyle='none', capsize=4)
+    ax1.plot(ch, mu, ls='-', alpha=0.4, lw=2, c = '#004C97')
+
+    ax2.errorbar(ch, sigma, yerr = err_sigma, marker='o', mec='white', markersize=7,
+                    color='#004C97', linestyle='none', capsize=4)
+    ax2.plot(ch, sigma, ls='-', alpha=0.4, lw=2, c = '#004C97')
+
+    # labels 
+    ax1.set_ylabel('Centroid [ADC counts]', fontsize = 14)
+    ax1.set_xlabel('Channel number', fontsize = 14)
+
+    ax2.set_ylabel('Sigma [ADC counts]', fontsize = 14)
+    ax2.set_xlabel('Channel number', fontsize = 14)
+
+    # ticks
+    y_ticks_spacing_1 = (np.max(mu) - np.min(mu)) / 5 
+    y_ticks_spacing_2 = (np.max(sigma) - np.min(sigma)) / 5 
+    set_ticks(ax1, 5, int(y_ticks_spacing_1))
+    set_ticks(ax2, 5, int(y_ticks_spacing_2))
+
+    plt.show()
+
+    if(save == 'True'):
+        outfile = pedestal_file.split('.')
+        fig.savefig(SAVE_PATH + outfile[0] + '_.pdf', dpi = 200)
+        print('Saving file as: %s' % (SAVE_PATH + outfile[0] + '_.pdf'))
+    
+
+   
+
 def main(infile, save, debug):
 
     print('Analysing csv file: %s' % infile)
     plot(infile, save)
-
+    pedestal(infile, save)
     if(debug == 'True'):
         valid_channels(infile, save)
 
