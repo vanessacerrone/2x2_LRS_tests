@@ -1,3 +1,10 @@
+/* 
+ -----------------------------------------------------------
+ Created : September 2022
+ Author  : Vanessa Cerrone (vanessa.cerrone@studenti.unipd.it)
+ -----------------------------------------------------------
+*/
+
 #include <iostream>
 #include <string>
 #include <sstream>

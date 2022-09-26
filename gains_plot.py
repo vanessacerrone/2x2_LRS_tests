@@ -232,29 +232,46 @@ def pedestal(infile, save):
     print('Opening file with pedestal data: ', pedestal_file)
 
     ch, mu, err_mu, sigma, err_sigma = np.loadtxt(pedestal_file, delimiter=',', unpack= True, skiprows=1)
-   
+    
+    # resolution on pedestal
+    res = (sigma / mu) * 100
+    
     fig, (ax1,ax2) = plt.subplots(1,2, figsize=(16,6))
+    ax3 = ax2.twinx()
 
     ax1.errorbar(ch, mu, yerr = err_mu, marker='o', mec='white', markersize=7,
                     color='#004C97', linestyle='none', capsize=4)
     ax1.plot(ch, mu, ls='-', alpha=0.4, lw=2, c = '#004C97')
 
     ax2.errorbar(ch, sigma, yerr = err_sigma, marker='o', mec='white', markersize=7,
-                    color='#004C97', linestyle='none', capsize=4)
-    ax2.plot(ch, sigma, ls='-', alpha=0.4, lw=2, c = '#004C97')
+                    color='#4C8C2B', linestyle='none', capsize=4)
+    ax2.plot(ch, sigma, ls='-', alpha=0.4, lw=2, c = '#4C8C2B')
+
+    ax3.plot(ch, res,  marker='s', mec='white', markersize=6,ls ='none', c = '#AF272F',zorder=5)
+    ax3.plot(ch, res, ls='-', alpha=0.4, lw=2, c = '#AF272F')
+
+    ax3.spines['right'].set_color('#AF272F')
+    ax3.tick_params(axis='y', colors='#AF272F')
+    ax3.yaxis.label.set_color('#AF272F')
+    ax3.set_ylim(np.min(res)-2, np.max(res)+1)
 
     # labels 
-    ax1.set_ylabel('Centroid [ADC counts]', fontsize = 14)
+    ax1.set_ylabel('Pedestal $\mu$ [ADC counts]', fontsize = 14)
     ax1.set_xlabel('Channel number', fontsize = 14)
 
-    ax2.set_ylabel('Sigma [ADC counts]', fontsize = 14)
+    ax2.set_ylabel('Pedestal $\sigma$ [ADC counts]', fontsize = 14)
     ax2.set_xlabel('Channel number', fontsize = 14)
+
+    ax3.set_ylabel('Pedestal resolution [%]', fontsize = 14)
 
     # ticks
     y_ticks_spacing_1 = (np.max(mu) - np.min(mu)) / 5 
     y_ticks_spacing_2 = (np.max(sigma) - np.min(sigma)) / 5 
+    y_ticks_spacing_3 = (np.max(res) - np.min(res)) / 3
+    
     set_ticks(ax1, 5, int(y_ticks_spacing_1))
     set_ticks(ax2, 5, int(y_ticks_spacing_2))
+    set_ticks(ax3, 5, int(y_ticks_spacing_3))
 
     plt.show()
 
