@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # run led calibration script
-# usage: .run.sh filename 
+# usage: . run.sh filename 
 
 echo "Analysing file: $1"
 

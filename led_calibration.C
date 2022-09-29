@@ -185,8 +185,8 @@ vector<Double_t> single_channel(const string infilename, short chan, int maxpeak
     // define range for gaussian fit 
     Double_t min[foundPeaks];
     Double_t max[foundPeaks];
-    Double_t min_resolution = 0.025;
-    Double_t max_resolution = 0.027;
+    Double_t min_resolution = 0.027;
+    Double_t max_resolution = 0.029;
 
     for (int i = 0; i<foundPeaks; i++){
 
